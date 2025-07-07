@@ -46,7 +46,10 @@
     "db:init": "node -e \"new (require('./dist/services/sqlite-storage-service').SQLiteStorageService)(); console.log('Database initialized')\"",
     "docs:rebuild": "ts-node src/scripts/rebuild-database.ts",
     "sync:runtime-version": "node scripts/sync-runtime-version.js",
-    "prepare:publish": "./scripts/publish-npm.sh"
+    "prepare:publish": "./scripts/publish-npm.sh",
+    "extension:init": "npx @anthropic-ai/dxt init",
+    "extension:build": "./scripts/build-extension.sh",
+    "extension:pack": "cd extension && npx @anthropic-ai/dxt pack"
   },
   "repository": {
     "type": "git",

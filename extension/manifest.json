@@ -1,0 +1,62 @@
+{
+  "dxt_version": "0.0.1",
+  "name": "n8n MCP Remote",
+  "description": "Connect to n8n workflow automation through MCP - access 500+ nodes documentation, create workflows, and manage automations",
+  "author": {
+    "name": "4xguy",
+    "email": "keithrivas@gmail.com"
+  },
+  "version": "2.7.9",
+  "license": "MIT",
+  "homepage": "https://github.com/4xguy/n8n-mcp",
+  "categories": ["automation", "workflow", "productivity", "developer-tools"],
+  "keywords": ["n8n", "workflow", "automation", "mcp", "nodes", "integrations"],
+  "icon": "icon.png",
+  "screenshots": [
+    {
+      "url": "screenshot1.png",
+      "description": "Access n8n node documentation and create workflows"
+    }
+  ],
+  "install_type": "node",
+  "npm": {
+    "package": "@modelcontextprotocol/mcp-remote",
+    "version": "latest"
+  },
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "serverUrl": {
+        "type": "string",
+        "title": "n8n MCP Server URL",
+        "description": "Your Railway deployment URL (e.g., https://n8n-mcp.up.railway.app)",
+        "pattern": "^https://.*",
+        "default": ""
+      },
+      "authToken": {
+        "type": "string",
+        "title": "Authentication Token",
+        "description": "Your server's AUTH_TOKEN for secure access",
+        "secret": true,
+        "default": ""
+      }
+    },
+    "required": ["serverUrl", "authToken"]
+  },
+  "allowed_domains": [
+    "*.railway.app",
+    "*.up.railway.app"
+  ],
+  "run": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/mcp-remote@latest",
+      "connect",
+      "--header",
+      "Authorization: Bearer {{authToken}}",
+      "{{serverUrl}}/mcp"
+    ],
+    "env": {}
+  }
+}
