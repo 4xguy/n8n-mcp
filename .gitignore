@@ -106,3 +106,7 @@ n8n-mcp-wrapper.sh
 
 # Package tarballs
 *.tgz
+
+# Temporarily ignore Dockerfiles for Railway
+Dockerfile
+Dockerfile.*
