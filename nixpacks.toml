@@ -1,0 +1,11 @@
+# Nixpacks configuration for Railway
+# This file customizes the build process
+
+[phases.setup]
+nixPkgs = ["nodejs-20_x"]
+
+[phases.build]
+cmds = ["npm install", "npm run build"]
+
+[start]
+cmd = "npm run start:http"
