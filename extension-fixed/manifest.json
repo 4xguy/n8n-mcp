@@ -19,19 +19,19 @@
     "mcp_config": {
       "command": "node",
       "args": [
-        "${__dirname}/server/index.js",
-        "--server-url",
-        "${user_config.serverUrl}",
-        "--auth-token",
-        "${user_config.authToken}"
-      ]
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "SERVER_URL": "${user_config.serverUrl}",
+        "AUTH_TOKEN": "${user_config.authToken}"
+      }
     }
   },
   "user_config": {
     "serverUrl": {
       "type": "string",
       "title": "n8n MCP Server URL",
-      "description": "Your Railway deployment URL (e.g., https://n8n-mcp.up.railway.app)",
+      "description": "Your Railway deployment URL (e.g., https://n8n-mcp-production-c68a.up.railway.app)",
       "default": "",
       "required": true,
       "pattern": "^https://.*"

@@ -1,0 +1,2 @@
+@echo off
+npx -y @modelcontextprotocol/mcp-remote@latest connect --header "Authorization: Bearer Ty97AAOUih+Q5UOhujKm3bEkYltX6RKgNgxPa4Pfmy4=" https://n8n-mcp-production-c68a.up.railway.app/mcp

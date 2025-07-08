@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "command": "C:\\path\\to\\your\\n8n-mcp-connect.bat"
+    }
+  }
+}

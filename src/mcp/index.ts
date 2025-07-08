@@ -32,8 +32,12 @@ async function main() {
     }
     
     if (mode === 'http') {
-      // Check if we should use the fixed implementation
-      if (process.env.USE_FIXED_HTTP === 'true') {
+      // Check if we should use OAuth implementation for Claude.ai
+      if (process.env.ENABLE_OAUTH === 'true') {
+        // Use OAuth-enabled HTTP server for Claude.ai integration
+        const { startOAuthHTTPServer } = await import('../http-server-oauth');
+        await startOAuthHTTPServer();
+      } else if (process.env.USE_FIXED_HTTP === 'true') {
         // Use the fixed HTTP implementation that bypasses StreamableHTTPServerTransport issues
         const { startFixedHTTPServer } = await import('../http-server');
         await startFixedHTTPServer();
