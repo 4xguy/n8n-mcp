@@ -156,6 +156,11 @@ export async function startOAuthHTTPServer() {
     next();
   });
   
+  // Handle OPTIONS requests for CORS preflight
+  app.options('*', (req, res) => {
+    res.sendStatus(200);
+  });
+
   // OAuth metadata endpoint (RFC8414)
   app.get('/.well-known/oauth-authorization-server', (req, res) => {
     res.json(oauthServer.getMetadata());
@@ -185,13 +190,42 @@ export async function startOAuthHTTPServer() {
   // OAuth authorization endpoint
   app.get('/oauth/authorize', async (req, res) => {
     try {
+      // Log the authorization request details
+      logger.info('Authorization request', {
+        query: req.query,
+        headers: {
+          referer: req.headers['referer'],
+          'user-agent': req.headers['user-agent']
+        }
+      });
+      
       // In a real implementation, you would show a consent screen here
       // For now, we'll auto-approve all requests
       const redirectUrl = await oauthServer.authorize(req);
       res.redirect(redirectUrl);
     } catch (error) {
-      logger.error('Authorization failed', error);
-      res.status(400).json({ error: error instanceof Error ? error.message : 'Authorization failed' });
+      logger.error('Authorization failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        client_id: req.query.client_id,
+        redirect_uri: req.query.redirect_uri
+      });
+      
+      // Return a more user-friendly error page for browser requests
+      if (req.headers['accept']?.includes('text/html')) {
+        res.status(400).send(`
+          <html>
+            <head><title>Authorization Error</title></head>
+            <body>
+              <h1>Authorization Failed</h1>
+              <p>Error: ${error instanceof Error ? error.message : 'Authorization failed'}</p>
+              <p>Client ID: ${req.query.client_id || 'Not provided'}</p>
+              <p>If you're connecting from Claude.ai, please ensure the MCP server URL includes /mcp at the end.</p>
+            </body>
+          </html>
+        `);
+      } else {
+        res.status(400).json({ error: error instanceof Error ? error.message : 'Authorization failed' });
+      }
     }
   });
   
