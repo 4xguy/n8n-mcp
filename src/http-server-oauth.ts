@@ -97,13 +97,16 @@ export async function startOAuthHTTPServer() {
   
   const app = express();
   
-  // Parse JSON for OAuth endpoints only (not MCP)
+  // Parse JSON and URL-encoded for OAuth endpoints (not MCP)
   app.use((req, res, next) => {
     if (req.path === '/mcp') {
-      // Skip JSON parsing for MCP endpoint
+      // Skip parsing for MCP endpoint
       return next();
     }
-    express.json()(req, res, next);
+    // Support both JSON and URL-encoded bodies
+    express.json()(req, res, () => {
+      express.urlencoded({ extended: true })(req, res, next);
+    });
   });
   
   // Configure trust proxy for correct IP logging behind reverse proxies
