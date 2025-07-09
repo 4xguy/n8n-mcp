@@ -97,17 +97,10 @@ export async function startOAuthHTTPServer() {
   
   const app = express();
   
-  // Parse JSON and URL-encoded for OAuth endpoints (not MCP)
-  app.use((req, res, next) => {
-    if (req.path === '/mcp') {
-      // Skip parsing for MCP endpoint
-      return next();
-    }
-    // Support both JSON and URL-encoded bodies
-    express.json()(req, res, () => {
-      express.urlencoded({ extended: true })(req, res, next);
-    });
-  });
+  // Parse JSON for most endpoints
+  app.use(express.json());
+  // Parse URL-encoded for OAuth endpoints
+  app.use(express.urlencoded({ extended: true }));
   
   // Configure trust proxy for correct IP logging behind reverse proxies
   const trustProxy = process.env.TRUST_PROXY ? Number(process.env.TRUST_PROXY) : 0;
@@ -156,11 +149,6 @@ export async function startOAuthHTTPServer() {
     next();
   });
   
-  // Handle OPTIONS requests for CORS preflight
-  app.options('*', (req, res) => {
-    res.sendStatus(200);
-  });
-
   // OAuth metadata endpoint (RFC8414)
   app.get('/.well-known/oauth-authorization-server', (req, res) => {
     res.json(oauthServer.getMetadata());
@@ -283,25 +271,16 @@ export async function startOAuthHTTPServer() {
     const startTime = Date.now();
     
     try {
-      // Collect the raw body for processing
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
+      const request = req.body;
+      logger.debug('Processing MCP request', { 
+        method: request.method,
+        id: request.id 
       });
       
-      await new Promise<void>((resolve, reject) => {
-        req.on('end', async () => {
-          try {
-            const request = JSON.parse(body);
-            logger.debug('Processing MCP request', { 
-              method: request.method,
-              id: request.id 
-            });
-            
-            // Handle the request based on method
-            let response;
-            
-            switch (request.method) {
+      // Handle the request based on method
+      let response;
+      
+      switch (request.method) {
               case 'initialize':
                 response = {
                   jsonrpc: '2.0',
@@ -380,36 +359,15 @@ export async function startOAuthHTTPServer() {
                 };
             }
             
-            // Log response time
-            const duration = Date.now() - startTime;
-            logger.info(`MCP request completed in ${duration}ms`, {
-              method: request.method,
-              duration
-            });
-            
-            // Send response
-            res.json(response);
-            resolve();
-          } catch (error) {
-            logger.error('Failed to process MCP request', error);
-            res.status(500).json({
-              jsonrpc: '2.0',
-              error: {
-                code: -32603,
-                message: 'Internal error',
-                data: error instanceof Error ? error.message : 'Unknown error'
-              },
-              id: null
-            });
-            resolve();
-          }
-        });
-        
-        req.on('error', (error) => {
-          logger.error('Request stream error', error);
-          reject(error);
-        });
+      // Log response time
+      const duration = Date.now() - startTime;
+      logger.info(`MCP request completed in ${duration}ms`, {
+        method: request.method,
+        duration
       });
+      
+      // Send response
+      res.json(response);
     } catch (error) {
       logger.error('Unexpected error in MCP handler', error);
       res.status(500).json({
